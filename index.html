@@ -1,0 +1,1752 @@
+<head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&family=Roboto+Mono:wght@300;400&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LCAW 2026 — Centigrade & iCR Strategy</title>
+
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:         #0C2340;
+    --navy-mid:     #1A3A5C;
+    --navy-light:   #2E5082;
+    --steel:        #4A7BA7;
+    --ice:          #5B8DB8;
+    --frost:        rgba(255,255,255,0.62);
+    --frost-heavy:  rgba(255,255,255,0.88);
+    --frost-border: rgba(12,35,64,0.1);
+    --page-bg:      #EDF1F7;
+    --amber:        #B5700F;
+    --amber-light:  rgba(181,112,15,0.08);
+    --text-primary:   #0C2340;
+    --text-secondary: #3D5C7A;
+    --text-muted:     #8BA5BE;
+    --must-fill:    #E8EEF4;
+    --must-border:  #5B8DB8;
+    --must-text:    #0C2340;
+    --bonus-fill:   #E6F4F1;
+    --bonus-border: #1A8C70;
+    --bonus-text:   #0F5C49;
+    --good-fill:    #FEF3E2;
+    --good-border:  #C07B20;
+    --good-text:    #7A4A0A;
+    --ai-fill:      #F0E8FF;
+    --ai-border:    #7B4FBF;
+    --ai-text:      #4A2A8C;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Roboto', Arial, sans-serif;
+    font-weight: 400;
+    background: var(--page-bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Light airy background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 50% at 15% 5%,  rgba(74,123,167,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 55% 45% at 85% 90%, rgba(12,35,64,0.07)  0%, transparent 55%),
+      radial-gradient(ellipse 40% 60% at 55% 40%, rgba(91,141,184,0.06) 0%, transparent 50%),
+      #EDF1F7;
+    z-index: -2;
+  }
+
+  /* Subtle grain */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* ── Navigation ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 48px;
+    height: 62px;
+    background: rgba(237,241,247,0.75);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(12,35,64,0.1);
+  }
+
+  .nav-brand {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    color: var(--navy);
+    text-transform: uppercase;
+  }
+
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+
+  .nav-links a {
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--navy); }
+
+  .nav-tag {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 10px;
+    color: var(--amber);
+    letter-spacing: 0.1em;
+    border: 1px solid rgba(181,112,15,0.35);
+    padding: 3px 10px;
+    border-radius: 2px;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 120px 80px 80px;
+    position: relative;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: var(--ice);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.2s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Roboto', Arial, sans-serif;
+    font-size: clamp(52px, 8vw, 92px);
+    font-weight: 400;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    color: var(--navy);
+    margin-bottom: 12px;
+    opacity: 0;
+    animation: fadeUp 0.9s ease 0.35s forwards;
+  }
+
+  .hero-title em { font-style: italic; color: var(--steel); }
+
+  .hero-subtitle {
+    font-family: 'Roboto', Arial, sans-serif;
+    font-size: clamp(18px, 2.5vw, 26px);
+    font-weight: 400;
+    color: var(--text-secondary);
+    margin-bottom: 56px;
+    opacity: 0;
+    animation: fadeUp 0.9s ease 0.5s forwards;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 40px;
+    opacity: 0;
+    animation: fadeUp 0.9s ease 0.65s forwards;
+  }
+
+  .hero-meta-item { display: flex; flex-direction: column; gap: 4px; }
+
+  .hero-meta-label {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .hero-meta-value {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--navy);
+  }
+
+  /* Soft floating orbs */
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+  }
+
+  .orb-1 {
+    width: 480px; height: 480px;
+    right: -80px; top: 8%;
+    background: radial-gradient(circle, rgba(74,123,167,0.2) 0%, transparent 70%);
+    animation: drift 14s ease-in-out infinite alternate;
+  }
+
+  .orb-2 {
+    width: 280px; height: 280px;
+    right: 18%; bottom: 15%;
+    background: radial-gradient(circle, rgba(12,35,64,0.07) 0%, transparent 70%);
+    animation: drift 18s ease-in-out infinite alternate-reverse;
+  }
+
+  @keyframes drift {
+    from { transform: translate(0, 0); }
+    to   { transform: translate(28px, -36px); }
+  }
+
+  /* ── Section layout ── */
+  section { padding: 96px 80px; position: relative; }
+
+  section:nth-child(even) {
+    background: rgba(255,255,255,0.35);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    margin-bottom: 52px;
+  }
+
+  .section-num {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    flex-shrink: 0;
+    padding-top: 4px;
+  }
+
+  .section-title {
+    font-family: 'Roboto', Arial, sans-serif;
+    font-size: clamp(30px, 4vw, 46px);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--navy);
+  }
+
+  .section-rule {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, rgba(12,35,64,0.15), transparent);
+    margin-left: 20px;
+    align-self: center;
+  }
+
+  /* ── Glass base ── */
+  .glass {
+    background: var(--frost);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid var(--frost-border);
+    border-radius: 4px;
+  }
+
+  .glass-heavy {
+    background: var(--frost-heavy);
+    backdrop-filter: blur(32px) saturate(180%);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+    border: 1px solid rgba(12,35,64,0.12);
+    border-radius: 4px;
+  }
+
+  /* ── Objectives ── */
+  .primary-card {
+    padding: 48px 52px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .primary-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(to right, var(--navy), var(--steel), transparent);
+  }
+
+  .card-eyebrow {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--ice);
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-family: 'Roboto', Arial, sans-serif;
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1.25;
+    color: var(--navy);
+    margin-bottom: 18px;
+  }
+
+  .card-body {
+    font-size: 14px;
+    line-height: 1.78;
+    color: var(--text-secondary);
+    max-width: 680px;
+  }
+
+  .secondary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 44px;
+  }
+
+  .secondary-card { padding: 30px 34px; }
+
+  .secondary-card-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--navy);
+    letter-spacing: 0.03em;
+    margin-bottom: 9px;
+  }
+
+  .secondary-card-body {
+    font-size: 13px;
+    line-height: 1.72;
+    color: var(--text-secondary);
+  }
+
+  /* ── Timeline ── */
+  .timeline-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.75;
+    margin-bottom: 24px;
+  }
+
+  .timeline {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .timeline-beat {
+    padding: 36px 40px;
+  }
+
+  .timeline-beat:first-child {
+    border-right: 1px solid rgba(12,35,64,0.08);
+  }
+
+  .timeline-when {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 12px;
+  }
+
+  .timeline-action {
+    font-family: 'Roboto', Arial, sans-serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--navy);
+    margin-bottom: 13px;
+    line-height: 1.3;
+  }
+
+  .timeline-detail {
+    font-size: 13px;
+    line-height: 1.72;
+    color: var(--text-secondary);
+  }
+
+  .timeline-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 16px;
+  }
+
+  .pill {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 4px 10px;
+    border: 1px solid rgba(12,35,64,0.15);
+    border-radius: 2px;
+    color: var(--navy);
+    background: rgba(12,35,64,0.04);
+  }
+
+  /* ── Tracks ── */
+  .tracks-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .track-card {
+    padding: 28px 30px;
+    transition: background 0.22s, border-color 0.22s, box-shadow 0.22s;
+    cursor: default;
+  }
+
+  .track-card:hover {
+    background: rgba(255,255,255,0.95);
+    border-color: rgba(12,35,64,0.18);
+    box-shadow: 0 4px 24px rgba(12,35,64,0.07);
+  }
+
+  .track-num {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    letter-spacing: 0.1em;
+  }
+
+  .track-name {
+    font-family: 'Roboto', Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--navy);
+    margin-bottom: 7px;
+    line-height: 1.2;
+  }
+
+  .track-event {
+    font-size: 11px;
+    color: var(--ice);
+    margin-bottom: 10px;
+    font-weight: 400;
+  }
+
+  .track-owner {
+    display: inline-block;
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    padding: 3px 8px;
+    border: 1px solid rgba(181,112,15,0.3);
+    color: var(--amber);
+    border-radius: 2px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    background: var(--amber-light);
+  }
+
+  .track-goal {
+    font-size: 12px;
+    line-height: 1.68;
+    color: var(--text-secondary);
+  }
+
+  /* ── Events ── */
+  .events-filter {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 38px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 8px 18px;
+    border: 1px solid rgba(12,35,64,0.15);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.18s;
+  }
+
+  .filter-btn:hover { color: var(--navy); border-color: rgba(12,35,64,0.3); }
+
+  .filter-btn.active {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: #fff;
+  }
+
+  .ai-filter-btn { border-color: var(--ai-border); color: var(--ai-text); }
+  .ai-filter-btn:hover { background: var(--ai-fill); }
+  .ai-filter-btn.active { background: var(--ai-text); border-color: var(--ai-text); color: #fff; }
+
+  .day-divider {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--navy);
+    font-weight: 500;
+    padding: 8px 16px;
+    margin-bottom: 10px;
+    margin-top: 20px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .day-divider::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+
+  .day-divider:first-of-type { margin-top: 0; }
+
+  /* Alternating day colours */
+  .day-divider:nth-of-type(1)  { background: rgba(12,35,64,0.06); color: #0C2340; }
+  .day-divider:nth-of-type(2)  { background: rgba(74,123,167,0.1); color: #1A3A5C; }
+  .day-divider:nth-of-type(3)  { background: rgba(26,140,112,0.08); color: #0F5C49; }
+  .day-divider:nth-of-type(4)  { background: rgba(181,112,15,0.1); color: #7A4A0A; }
+  .day-divider:nth-of-type(5)  { background: rgba(123,79,191,0.08); color: #4A2A8C; }
+  .day-divider:nth-of-type(6)  { background: rgba(12,35,64,0.06); color: #0C2340; }
+  .day-divider:nth-of-type(7)  { background: rgba(74,123,167,0.1); color: #1A3A5C; }
+  .day-divider:nth-of-type(8)  { background: rgba(26,140,112,0.08); color: #0F5C49; }
+
+  .event-row {
+    display: grid;
+    grid-template-columns: 76px auto 1fr auto;
+    gap: 22px;
+    align-items: start;
+    padding: 16px 20px;
+    margin-bottom: 4px;
+    border-radius: 3px;
+    transition: background 0.18s, box-shadow 0.18s;
+    border: 1px solid transparent;
+    border-left: 3px solid transparent;
+  }
+
+  .event-row:hover {
+    background: rgba(255,255,255,0.7);
+    box-shadow: 0 2px 12px rgba(12,35,64,0.05);
+  }
+
+  .event-row[data-tier="must"]  { border-left-color: var(--must-border); }
+  .event-row[data-tier="bonus"] { border-left-color: var(--bonus-border); }
+  .event-row[data-tier="good"]  { border-left-color: var(--good-border); }
+  .event-row[data-ai="true"]    { border-left-color: var(--ai-border); }
+
+  .event-row.hidden { display: none; }
+
+  .event-tier { display: flex; align-items: flex-start; padding-top: 2px; }
+
+  .tier-badge {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 7px;
+    border-radius: 2px;
+    font-weight: 400;
+  }
+
+  .tier-must  { background: var(--must-fill); color: var(--must-text); border: 1px solid var(--must-border); font-weight: 500; }
+  .tier-bonus { background: var(--bonus-fill); color: var(--bonus-text); border: 1px solid var(--bonus-border); font-weight: 500; }
+  .tier-good  { background: var(--good-fill); color: var(--good-text); border: 1px solid var(--good-border); font-weight: 500; }
+  .tier-ai    { background: var(--ai-fill); color: var(--ai-text); border: 1px solid var(--ai-border); font-weight: 500; }
+
+  .event-body { min-width: 0; }
+
+  .event-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--navy);
+    margin-bottom: 4px;
+    line-height: 1.35;
+  }
+
+  .event-meta-row {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 5px;
+    flex-wrap: wrap;
+  }
+
+  .event-time {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+  }
+
+  .event-host { font-size: 11px; color: var(--text-muted); font-style: italic; }
+
+  .event-why {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.62;
+  }
+
+  .msci-flag {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    padding: 3px 9px;
+    background: var(--amber-light);
+    border: 1px solid rgba(181,112,15,0.28);
+    color: var(--amber);
+    border-radius: 2px;
+    white-space: nowrap;
+    align-self: flex-start;
+    flex-shrink: 0;
+  }
+
+  .ai-flag {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    padding: 3px 9px;
+    background: var(--ai-fill);
+    border: 1px solid var(--ai-border);
+    color: var(--ai-text);
+    border-radius: 2px;
+    white-space: nowrap;
+    align-self: flex-start;
+    flex-shrink: 0;
+    font-weight: 500;
+  }
+
+  /* ── Roles ── */
+  .roles-table { width: 100%; border-collapse: collapse; }
+
+  .roles-table th {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--navy);
+    text-align: left;
+    padding: 13px 20px;
+    background: rgba(12,35,64,0.05);
+    border-bottom: 1px solid rgba(12,35,64,0.1);
+    font-weight: 400;
+  }
+
+  .roles-table td {
+    padding: 16px 20px;
+    font-size: 13px;
+    line-height: 1.62;
+    border-bottom: 1px solid rgba(12,35,64,0.06);
+    color: var(--text-secondary);
+    vertical-align: top;
+  }
+
+  .roles-table td:first-child { color: var(--navy); font-weight: 500; white-space: nowrap; }
+
+  .roles-table td:nth-child(2) {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--amber);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .roles-table tr:last-child td { border-bottom: none; }
+
+  /* ── Metrics ── */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .metric-card {
+    padding: 34px 30px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(to right, var(--navy-light), transparent);
+  }
+
+  .metric-category {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin-bottom: 20px;
+  }
+
+  .metric-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 11px;
+  }
+
+  .metric-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--steel);
+    margin-top: 7px;
+    flex-shrink: 0;
+  }
+
+  .metric-text {
+    font-size: 13px;
+    line-height: 1.68;
+    color: var(--text-secondary);
+  }
+
+
+  /* ── Next Steps ── */
+  .next-steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+
+  .next-step-card {
+    padding: 30px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .next-step-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .next-step-card.sovereign::before { background: linear-gradient(to right, #1A8C70, transparent); }
+  .next-step-card.integrity::before { background: linear-gradient(to right, #5B8DB8, transparent); }
+  .next-step-card.buyers::before    { background: linear-gradient(to right, #C07B20, transparent); }
+
+  .step-icon {
+    font-size: 18px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .step-category {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-weight: 400;
+  }
+
+  .step-category.sovereign { color: #0F5C49; }
+  .step-category.integrity { color: #1A3A5C; }
+  .step-category.buyers    { color: #7A4A0A; }
+
+  .step-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--navy);
+    margin-bottom: 14px;
+    line-height: 1.3;
+  }
+
+  .step-items { list-style: none; }
+
+  .step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    margin-bottom: 9px;
+  }
+
+  .step-bullet {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    margin-top: 7px;
+    flex-shrink: 0;
+  }
+
+  .step-bullet.sovereign { background: #1A8C70; }
+  .step-bullet.integrity { background: #5B8DB8; }
+  .step-bullet.buyers    { background: #C07B20; }
+
+  .step-text {
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text-secondary);
+  }
+
+  .step-owner-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(12,35,64,0.07);
+  }
+
+  .step-owner-label {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .step-owner-name {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 10px;
+    color: var(--amber);
+    font-weight: 400;
+    border: 1px solid rgba(181,112,15,0.28);
+    padding: 2px 8px;
+    border-radius: 2px;
+    background: rgba(181,112,15,0.06);
+  }
+
+
+  /* ── LinkedIn Track ── */
+  .linkedin-section { margin-top: 40px; }
+
+  .linkedin-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .linkedin-icon {
+    width: 32px; height: 32px;
+    background: #0A66C2;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .linkedin-icon svg { width: 18px; height: 18px; fill: #fff; }
+
+  .linkedin-label {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #0A66C2;
+  }
+
+  .linkedin-timeline {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid rgba(10,102,194,0.15);
+  }
+
+  .li-beat {
+    padding: 28px 28px 24px;
+    position: relative;
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .li-beat:not(:last-child) {
+    border-right: 1px solid rgba(10,102,194,0.1);
+  }
+
+  .li-beat::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(to right, #0A66C2, transparent);
+  }
+
+  .li-beat-when {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #0A66C2;
+    margin-bottom: 10px;
+  }
+
+  .li-beat-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--navy);
+    margin-bottom: 10px;
+    line-height: 1.35;
+  }
+
+  .li-beat-body {
+    font-size: 12px;
+    line-height: 1.68;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+  }
+
+  .li-post-example {
+    background: rgba(10,102,194,0.05);
+    border: 1px solid rgba(10,102,194,0.15);
+    border-left: 3px solid #0A66C2;
+    border-radius: 3px;
+    padding: 12px 14px;
+    font-size: 12px;
+    line-height: 1.65;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  .li-cadence {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+  }
+
+  .li-cadence-pill {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    padding: 3px 9px;
+    background: rgba(10,102,194,0.06);
+    border: 1px solid rgba(10,102,194,0.2);
+    color: #0A66C2;
+    border-radius: 2px;
+  }
+
+
+  /* ── Checklist ── */
+  .checklist-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .checklist-group {
+    padding: 18px 24px;
+    border-radius: 0;
+    border-bottom: 1px solid rgba(12,35,64,0.06);
+  }
+  .checklist-group:first-child { border-radius: 4px 4px 0 0; }
+  .checklist-group:last-child  { border-radius: 0 0 4px 4px; border-bottom: none; }
+
+  .checklist-group-title {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .group-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .checklist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    user-select: none;
+  }
+
+  .checklist-item:hover .check-box { border-color: var(--navy); }
+
+  .check-box {
+    width: 18px; height: 18px;
+    border: 1.5px solid rgba(12,35,64,0.25);
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.18s;
+    background: white;
+  }
+
+  .check-box svg {
+    width: 10px; height: 10px;
+    stroke: white;
+    stroke-width: 2.5;
+    fill: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .checklist-item.done .check-box {
+    background: var(--navy);
+    border-color: var(--navy);
+  }
+
+  .checklist-item.done .check-box svg { opacity: 1; }
+
+  .checklist-item.done .check-text {
+    text-decoration: line-through;
+    color: var(--text-muted);
+  }
+
+  .check-text {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    transition: color 0.2s;
+  }
+
+  .check-owner {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 2px 7px;
+    border-radius: 2px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 3px;
+    align-self: flex-start;
+  }
+
+  .owner-rose  { background: rgba(26,140,112,0.1); color: #0F5C49; border: 1px solid rgba(26,140,112,0.25); }
+  .owner-hollis{ background: rgba(91,141,184,0.1);  color: #1A3A5C; border: 1px solid rgba(91,141,184,0.3); }
+  .owner-oli   { background: rgba(181,112,15,0.1);  color: #7A4A0A; border: 1px solid rgba(181,112,15,0.28); }
+  .owner-james { background: rgba(123,79,191,0.1);  color: #4A2A8C; border: 1px solid rgba(123,79,191,0.28); }
+  .owner-all   { background: rgba(12,35,64,0.07);   color: #1A3A5C; border: 1px solid rgba(12,35,64,0.18); }
+
+  .checklist-progress {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+
+  .progress-bar-wrap {
+    flex: 1;
+    height: 4px;
+    background: rgba(12,35,64,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--navy), var(--steel));
+    border-radius: 2px;
+    transition: width 0.35s ease;
+  }
+
+  .progress-label {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+
+
+  /* ── Clash notes ── */
+  .clash-note {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 7px;
+    background: rgba(181,112,15,0.08);
+    border: 1px solid rgba(181,112,15,0.3);
+    border-left: 3px solid #C07B20;
+    border-radius: 3px;
+    padding: 8px 12px;
+    margin-top: 8px;
+    font-size: 11px;
+    line-height: 1.55;
+    color: #7A4A0A;
+    width: 100%;
+  }
+
+  .clash-icon { flex-shrink: 0; font-size: 13px; }
+
+  /* ── Sign-up toggle ── */
+  .signup-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 2px;
+    border: 1px solid rgba(12,35,64,0.2);
+    background: white;
+    color: var(--text-muted);
+    transition: all 0.18s;
+    white-space: nowrap;
+    align-self: flex-start;
+    flex-shrink: 0;
+    user-select: none;
+  }
+
+  .signup-toggle:hover { border-color: var(--navy); color: var(--navy); }
+
+  .signup-toggle.signed { background: var(--navy); color: white; border-color: var(--navy); }
+
+  .signup-check { font-size: 10px; }
+
+
+  .event-name a {
+    color: var(--navy);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(12,35,64,0.2);
+    transition: border-color 0.15s;
+  }
+  .event-name a:hover {
+    border-color: var(--navy);
+  }
+
+  /* ── Owner badges ── */
+  .owner-badge {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 2px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    align-self: flex-start;
+    margin-top: 1px;
+    text-transform: uppercase;
+  }
+  .owner-oli   { background: #E8EEF4; color: #0C2340; border: 1px solid #5B8DB8; }
+  .owner-james { background: #EEEDFE; color: #3C3489; border: 1px solid #9B93E0; }
+  .owner-both  { background: #E6F4F1; color: #0F5C49; border: 1px solid #1A8C70; }
+
+  /* ── Footer ── */
+  footer {
+    padding: 44px 80px;
+    border-top: 1px solid rgba(12,35,64,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.4);
+  }
+
+  .footer-brand {
+    font-family: 'Roboto', Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--text-secondary);
+  }
+
+  .footer-meta {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.09em;
+    text-align: right;
+    line-height: 1.8;
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.65s ease, transform 0.65s ease;
+  }
+
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(12,35,64,0.15); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-brand">Centigrade & iCR</span>
+  <ul class="nav-links">
+    <li><a href="#objectives">Objectives</a></li>
+    <li><a href="#tracks">Tracks</a></li>
+    <li><a href="#events">Events</a></li>
+    <li><a href="#roles">Roles</a></li>
+    <li><a href="#metrics">Metrics</a></li>
+    <li><a href="#next-steps">Next Steps</a></li>
+  </ul>
+  <span class="nav-tag">Confidential</span>
+</nav>
+
+<div class="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <p class="hero-eyebrow">London Climate Action Week · 20–28 June 2026</p>
+  <h1 class="hero-title">LCAW 2026<br><em>Strategy</em></h1>
+  <p class="hero-subtitle">Centigrade & iCR — Event Presence</p>
+  <div class="hero-meta">
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Date</span>
+      <span class="hero-meta-value">20–28 June 2026</span>
+    </div>
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Location</span>
+      <span class="hero-meta-value">London, UK</span>
+    </div>
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Focus</span>
+      <span class="hero-meta-value">MSCI Ratings Announcement</span>
+    </div>
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Scale</span>
+      <span class="hero-meta-value">700+ events · 45,000+ attendees</span>
+    </div>
+  </div>
+</div>
+
+<section id="objectives">
+  <div class="section-header reveal">
+    <span class="section-num">01</span>
+    <h2 class="section-title">Objectives</h2>
+    <div class="section-rule"></div>
+  </div>
+
+  <div class="primary-card glass-heavy reveal">
+    <p class="card-eyebrow">Primary Objective</p>
+    <h3 class="card-title">Announce MSCI ratings on iCR</h3>
+    <p class="card-body">Use LCAW as the launch platform to establish iCR as the first carbon registry with MSCI institutional ratings embedded as standard. Position Centigrade as the horizontal integrity layer. Convert credibility into buyer demand and partner confidence.</p>
+  
+</div>
+
+  <div class="secondary-grid reveal">
+    <div class="secondary-card glass">
+      <p class="secondary-card-title">Brand Awareness</p>
+      <p class="secondary-card-body">Raise Centigrade and iCR visibility across VCM, CDR, climate risk, and digital infrastructure communities. Be known before people need us.</p>
+    </div>
+    <div class="secondary-card glass">
+      <p class="secondary-card-title">Reconnect Existing Partners</p>
+      <p class="secondary-card-body">Re-engage key relationships in person — partners, VVBs, buyers, ESG consultants — and log all interactions to Attio within 5 days.</p>
+    </div>
+  </div>
+
+  <div class="reveal" style="margin-top:48px;">
+    <p style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ice);margin-bottom:14px;">Announcement Timeline</p>
+    <p class="timeline-label">The MSCI ratings announcement is a two-beat campaign. A press release seeds initial market interest one month before LCAW; the event delivers the formal announcement with MSCI, KITA, and Centigrade on stage together.</p>
+    <div class="timeline glass">
+      <div class="timeline-beat">
+        <p class="timeline-when">May 2026 — one month prior</p>
+        <h4 class="timeline-action">Press release — seed initial interest</h4>
+        <p class="timeline-detail">Joint press release from iCR, MSCI, and KITA announcing the integration. Distributed to carbon market media approximately one month before LCAW to seed awareness and generate inbound interest ahead of the full event announcement.</p>
+        <div class="timeline-pills">
+          <span class="pill">Carbon Pulse</span>
+          <span class="pill">Ecosystem Marketplace</span>
+          <span class="pill">Reuters Events</span>
+        </div>
+      </div>
+      <div class="timeline-beat">
+        <p class="timeline-when">LCAW — June 2026</p>
+        <h4 class="timeline-action">Formal announcement — MSCI + KITA + Centigrade on stage</h4>
+        <p class="timeline-detail">Centigrade & iCR side event bringing together iCR (registry), MSCI (ratings methodology), and KITA (insurance layer). </p>
+        <div class="timeline-pills">
+          <span class="pill">Centigrade & iCR</span>
+          <span class="pill">MSCI</span>
+          <span class="pill">KITA</span>
+          <span class="pill">Guildhall</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="tracks">
+  <div class="section-header reveal">
+    <span class="section-num">02</span>
+    <h2 class="section-title">Strategic Tracks</h2>
+    <div class="section-rule"></div>
+  </div>
+  <p class="timeline-label reveal" style="margin-bottom:38px;">Six parallel workstreams structure the week. Each has a clear objective, a lead, and a defined event anchor. These are not isolated events — they are threads of the same narrative.</p>
+
+  
+    <div class="tracks-grid">
+
+      <div class="track-card glass reveal">
+        <p class="track-num">01 / Primary</p>
+        <h3 class="track-name">Announce MSCI Ratings</h3>
+        <p class="track-event">Centigrade &amp; iCR MSCI panel</p>
+        <span class="track-owner">Oli &amp; James</span>
+        <p class="track-goal">Flagship announcement moment. Amplify at Climate Innovation Forum, close at Article 6 in Action.</p>
+      </div>
+
+      <div class="track-card glass reveal">
+        <p class="track-num">02 / Developer</p>
+        <h3 class="track-name">New Developer Leads</h3>
+        <p class="track-event">Invest in Nature</p>
+        <span class="track-owner">Oli</span>
+        <p class="track-goal">Developer track — build registry trust. Target 5+ qualified conversations in Attio.</p>
+      </div>
+
+      <div class="track-card glass reveal">
+        <p class="track-num">03 / Finance</p>
+        <h3 class="track-name">Finance Relationships (GIX)</h3>
+        <p class="track-event">UNEP FI Roundtable</p>
+        <span class="track-owner">James</span>
+        <p class="track-goal">Senior finance relationships for GIX exchange partnership. Build institutional capital.</p>
+      </div>
+
+      <div class="track-card glass reveal">
+        <p class="track-num">04 / Policy</p>
+        <h3 class="track-name">Policy / PD Pipeline</h3>
+        <p class="track-event">1:1 meetings during LCAW</p>
+        <span class="track-owner">Oli</span>
+        <p class="track-goal">European PDs and policy contacts. Pipeline ahead of CORSIA and CCP accreditation outcomes.</p>
+      </div>
+
+      <div class="track-card glass reveal">
+        <p class="track-num">05 / Relationships</p>
+        <h3 class="track-name">Reconnect Relationships</h3>
+        <p class="track-event">Side event + evening dinners</p>
+        <span class="track-owner">Both</span>
+        <p class="track-goal">Relationship capital — re-engage top 5 existing partners in person.</p>
+      </div>
+
+    </div>
+</div>
+</section>
+
+<section id="events">
+  <div class="section-header reveal">
+    <span class="section-num">03</span>
+    <h2 class="section-title">Event Calendar</h2>
+    <div class="section-rule"></div>
+  </div>
+
+  <div class="reveal" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center;">
+    <span style="font-family:'Roboto Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;">Who attends:</span>
+    <span class="owner-badge owner-oli">Oli</span>
+    <span class="owner-badge owner-james">James</span>
+    <span class="owner-badge owner-both">Both</span>
+  </div>
+  <div class="events-filter reveal">
+    <button class="filter-btn active" onclick="filterEvents('all',this)">All events</button>
+    <button class="filter-btn" onclick="filterEvents('must',this)">Must attend</button>
+    <button class="filter-btn" onclick="filterEvents('bonus',this)">Bonus</button>
+    <button class="filter-btn" onclick="filterEvents('msci',this)">MSCI moments</button>
+    <button class="filter-btn ai-filter-btn" onclick="filterEvents('ai',this)">AI / Data centres</button>
+  </div>
+
+  <div id="events-list">
+    <p style="font-family:'Roboto Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--amber);padding:8px 4px 16px;text-transform:uppercase;">⚠ More events will be added as they are posted — last updated 13/05/26</p>
+
+
+    <div class="day-divider">Monday 22 June</div>
+
+    <div class="event-row" data-tier="must" data-msci="true">
+      <div class="event-tier"><span class="tier-badge tier-must">MUST</span></div>
+      <span class="owner-badge owner-both">Both</span>
+      <div class="event-body">
+        <p class="event-name"><a href="https://events.climateaction.org/climate-innovation-forum/registration/" target="_blank" style="color:var(--navy);text-decoration:none;border-bottom:1px solid rgba(12,35,64,0.25);">Climate Innovation Forum — VCM &amp; Nature Based panel</a></p>
+        <div class="event-meta-row"><span class="event-time">All day · Guildhall, London</span><span class="event-host">Nature-based panels · AI solutions · Senior public officials / govs</span>
+        <a class="signup-toggle" href="https://events.climateaction.org/climate-innovation-forum/registration/" target="_blank" onclick="markSignup(this, event)"><span class="signup-check">○</span> Sign up</a></div>
+        <p class="event-why">Nature-based and AI panels with senior government officials. Prime audience for MSCI announcement seeding.</p>
+      </div>
+      <span class="msci-flag">MSCI moment</span>
+    </div>
+
+    <div class="event-row" data-tier="must" data-msci="true" style="border-left:3px solid #3C3489;background:rgba(60,52,137,0.04);">
+      <div class="event-tier"><span class="tier-badge" style="background:#EEEDFE;color:#3C3489;border:1px solid #9B93E0;">PANEL</span></div>
+      <span class="owner-badge owner-both">Both</span>
+      <div class="event-body">
+        <p class="event-name" style="color:#3C3489;font-weight:600;">Centigrade &amp; iCR × MSCI × KITA — MSCI Ratings Announcement</p>
+        <div class="event-meta-row"><span class="event-time">17:00 (proposed) · Venue TBC</span><span class="event-host">Oli (iCR) · James (Centigrade) · MSCI · KITA</span></div>
+        <p class="event-why">Flagship announcement moment. Formal launch of MSCI institutional ratings embedded in iCR as standard.</p>
+      </div>
+      <span class="msci-flag">★ Main event</span>
+    </div>
+
+    <div class="day-divider">Tuesday 23 June</div>
+
+    <div class="event-row" data-tier="must" data-msci="true">
+      <div class="event-tier"><span class="tier-badge tier-must">MUST</span></div>
+      <span class="owner-badge owner-both">Both</span>
+      <div class="event-body">
+        <p class="event-name"><a href="https://www.climatebonds.net/news-events/events-training-and-webinars/global-climate-bonds-connect-2026" target="_blank" style="color:var(--navy);text-decoration:none;border-bottom:1px solid rgba(12,35,64,0.25);">Climate Bonds CONNECT — Carbon markets day</a></p>
+        <div class="event-meta-row"><span class="event-time">08:30–17:00 · The Brewery, 52 Chiswell St, London EC1Y 4SD</span><span class="event-host">Climate Bonds Initiative · Climate Policy Initiative</span>
+        <a class="signup-toggle" href="https://www.climatebonds.net/news-events/events-training-and-webinars/global-climate-bonds-connect-2026" target="_blank" onclick="markSignup(this, event)"><span class="signup-check">○</span> Sign up</a></div>
+        <p class="event-why">Finance and carbon markets day. High density of institutional buyers and climate finance leads. Key audience for MSCI framing.</p>
+      </div>
+      <span class="msci-flag">MSCI moment</span>
+    </div>
+
+    <div class="day-divider">Wednesday 24 June</div>
+
+    <div class="event-row" data-tier="good" data-msci="false">
+      <div class="event-tier"><span class="tier-badge tier-good">GOOD</span></div>
+      <span class="owner-badge owner-james">James</span>
+      <div class="event-body">
+        <p class="event-name"><a href="https://carbontracker.org/lcaw-integrating-climate-risk-into-investment-decisions-and-risk-management-roundtable-for-investors/" target="_blank" style="color:var(--navy);text-decoration:none;border-bottom:1px solid rgba(12,35,64,0.25);">Climate Risk into Investment Decisions — Roundtable for Investors</a></p>
+        <div class="event-meta-row"><span class="event-time">08:30–11:00 · MSCI, 10 Bishops Square, London E1 6EG</span><span class="event-host">Carbon Tracker · Institutional investors</span>
+        <a class="signup-toggle" href="https://carbontracker.org/lcaw-integrating-climate-risk-into-investment-decisions-and-risk-management-roundtable-for-investors/" target="_blank" onclick="markSignup(this, event)"><span class="signup-check">○</span> Sign up</a></div>
+        <p class="event-why">Senior investor audience at MSCI's own offices. Direct overlap with MSCI ratings narrative and GIX institutional capital track.</p>
+      </div>
+    </div>
+
+    <div class="event-row" data-tier="must" data-msci="false">
+      <div class="event-tier"><span class="tier-badge tier-must">MUST</span></div>
+      <span class="owner-badge owner-james">James</span>
+      <div class="event-body">
+        <p class="event-name"><a href="https://forms.office.com/Pages/ResponsePage.aspx?id=2zWeD09UYE-9zF6kFubccDsjwy9uI1dEobK65ColBn9UNVg3Rkg2SlNaMFlDMEtYV1NDTjZJVlVOTi4u" target="_blank" style="color:var(--navy);text-decoration:none;border-bottom:1px solid rgba(12,35,64,0.25);">UNEP FI Roundtable — Finance / GIX Track</a></p>
+        <div class="event-meta-row"><span class="event-time">23–24 Jun · Venue TBC</span><span class="event-host">UNEP Finance Initiative</span>
+        <a class="signup-toggle" href="https://forms.office.com/Pages/ResponsePage.aspx?id=2zWeD09UYE-9zF6kFubccDsjwy9uI1dEobK65ColBn9UNVg3Rkg2SlNaMFlDMEtYV1NDTjZJVlVOTi4u" target="_blank" onclick="markSignup(this, event)"><span class="signup-check">○</span> Sign up</a></div>
+        <p class="event-why">Senior finance relationships for GIX exchange partnership. Institutional capital pipeline.</p>
+      </div>
+    </div>
+
+    <div class="day-divider">Thursday 25 June — James departs Thursday morning</div>
+
+    <div class="event-row" data-tier="good" data-msci="false">
+      <div class="event-tier"><span class="tier-badge tier-good">GOOD</span></div>
+      <span class="owner-badge owner-both">Both</span>
+      <div class="event-body">
+        <p class="event-name"><a href="https://lp.erm.com/l/1094012/2026-04-27/5sj75q" target="_blank" style="color:var(--navy);text-decoration:none;border-bottom:1px solid rgba(12,35,64,0.25);">Can nature and climate resilience pay back — now?</a></p>
+        <div class="event-meta-row"><span class="event-time">08:30–09:30 · Central London (venue on registration)</span><span class="event-host">Natcap · Jupiter Intelligence · ERM</span>
+        <a class="signup-toggle" href="https://lp.erm.com/l/1094012/2026-04-27/5sj75q" target="_blank" onclick="markSignup(this, event)"><span class="signup-check">○</span> Sign up</a></div>
+        <p class="event-why">Climate risk and NbS resilience panel. Natcap and Jupiter are key climate risk players — bonus overlap with risk track.</p>
+      </div>
+    </div>
+
+    <div class="event-row" data-tier="must" data-msci="false">
+      <div class="event-tier"><span class="tier-badge tier-must">MUST</span></div>
+      <span class="owner-badge owner-oli">Oli</span>
+      <div class="event-body">
+        <p class="event-name"><a href="https://crm.nature4climate.org/pre_registrations_Nature_Hub_LCAW_2026" target="_blank" style="color:var(--navy);text-decoration:none;border-bottom:1px solid rgba(12,35,64,0.25);">Invest with Nature: for a thriving economy</a></p>
+        <div class="event-meta-row"><span class="event-time">08:30–17:00 · London Zoo, Regent's Park</span><span class="event-host">Nature4Climate · Private sector NbS investment</span>
+        <a class="signup-toggle" href="https://crm.nature4climate.org/pre_registrations_Nature_Hub_LCAW_2026" target="_blank" onclick="markSignup(this, event)"><span class="signup-check">○</span> Sign up</a></div>
+        <p class="event-why">Full-day NbS investment summit. High-value private sector audience for nature-based developer and buyer pipeline. Oli only after James departs.</p>
+      </div>
+    </div>
+
+    <div class="event-row" data-tier="good" data-msci="false">
+      <div class="event-tier"><span class="tier-badge tier-good">GOOD</span></div>
+      <span class="owner-badge owner-oli">Oli</span>
+      <div class="event-body">
+        <p class="event-name"><a href="https://sustainabilitymag.com/events/sustainability-live/sustainability-live-london-climate-action-week/register-your-interest" target="_blank" style="color:var(--navy);text-decoration:none;border-bottom:1px solid rgba(12,35,64,0.25);">The Nature-Based Solutions Summit</a></p>
+        <div class="event-meta-row"><span class="event-time">12:15–13:00 · Sustainability Live London (LCAW)</span><span class="event-host">Sustainability Magazine</span>
+        <a class="signup-toggle" href="https://sustainabilitymag.com/events/sustainability-live/sustainability-live-london-climate-action-week/register-your-interest" target="_blank" onclick="markSignup(this, event)"><span class="signup-check">○</span> Sign up</a></div>
+        <p class="event-why">Focused NbS panel at Sustainability Live. Good for developer leads and NbS buyer pipeline. Oli attends solo.</p>
+      </div>
+    </div>
+
+  </div>
+
+    
+
+    </div>
+  </div>
+</section>
+
+<section id="roles">
+  <div class="section-header reveal">
+    <span class="section-num">04</span>
+    <h2 class="section-title">Roles & Responsibilities</h2>
+    <div class="section-rule"></div>
+  </div>
+  <div class="glass reveal" style="overflow:hidden;border-radius:4px;">
+    <table class="roles-table">
+      <thead>
+        <tr><th>Phase</th><th>Owner</th><th>Timing</th><th>Key actions</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Pre-event outreach</td><td>Oli, James, Rose</td><td>Now — 20 Jun</td><td>Contact key targets. Secure invite-only slots.</td></tr>
+        <tr><td>Calendar management</td><td>Rose</td><td>Now — 20 Jun</td><td>Stack meetings and coordinate logistics.</td></tr>
+        <tr><td>On-the-ground</td><td>Oli, James</td><td>20–28 Jun</td><td>Divide and conquer across parallel sessions. Capture contacts same day.</td></tr>
+        <tr><td>Post-event follow-up</td><td>Oli, Rose</td><td>w/c 29 Jun</td><td>Log all leads to Attio. Send follow-ups within 48 hours. Capture insights for team debrief.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="metrics">
+  <div class="section-header reveal">
+    <span class="section-num">05</span>
+    <h2 class="section-title">Success Metrics</h2>
+    <div class="section-rule"></div>
+  </div>
+  <p class="timeline-label reveal" style="margin-bottom:38px;">These are the measures we will use to evaluate the week. Log all outcomes in Attio within 5 working days of the event.</p>
+
+  <div class="metrics-grid">
+    <div class="metric-card glass reveal">
+      <p class="metric-category">Announcement impact</p>
+      <div class="metric-item"><div class="metric-dot" style="background:#7B4FBF;"></div><p class="metric-text"><strong>MSCI panel:</strong> Oli representing iCR, James representing Centigrade on stage together with MSCI and KITA</p></div>
+      <div class="metric-item"><div class="metric-dot"></div><p class="metric-text">MSCI ratings formally announced — at Climate Innovation Forum or own side event</p></div>
+      <div class="metric-item"><div class="metric-dot"></div><p class="metric-text">Good turnout to the iCR side event / panel</p></div>
+      <div class="metric-item"><div class="metric-dot"></div><p class="metric-text">At least 4 press or social media mentions during the week</p></div>
+    </div>
+    <div class="metric-card glass reveal">
+      <p class="metric-category">Lead generation</p>
+      <div class="metric-item"><div class="metric-dot"></div><p class="metric-text">1 flagship customer signed or in advanced conversations (brand anchor)</p></div>
+      <div class="metric-item"><div class="metric-dot"></div><p class="metric-text">5+ qualified developer conversations logged to Attio with clear next steps</p></div>
+      <div class="metric-item"><div class="metric-dot"></div><p class="metric-text">3+ qualified reseller or ESG fund manager conversations</p></div>
+      <div class="metric-item"><div class="metric-dot"></div><p class="metric-text">1 secured broker relationship initiated</p></div>
+    </div>
+    <div class="metric-card glass reveal">
+      <p class="metric-category">Relationships</p>
+      <div class="metric-item"><div class="metric-dot"></div><p class="metric-text">Top 5 existing partners re-engaged in person</p></div>
+      <div class="metric-item"><div class="metric-dot"></div><p class="metric-text">All leads and meeting notes in Attio within 5 working days of the event</p></div>
+      <div class="metric-item"><div class="metric-dot"></div><p class="metric-text">At least 2 partner dinners or evening sessions completed</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="next-steps" style="background: rgba(255,255,255,0.35);">
+  <div class="section-header reveal">
+    <span class="section-num">06</span>
+    <h2 class="section-title">Next Steps</h2>
+    <div class="section-rule"></div>
+  </div>
+
+  <div class="checklist-progress reveal">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <span class="progress-label" id="progress-label">0 / 9 complete</span>
+  </div>
+
+  <div class="checklist-grid">
+
+    <!-- Sign up & logistics -->
+    <div class="checklist-group glass reveal">
+      <div class="checklist-group-title" style="color:#4A2A8C;">
+        <div class="group-dot" style="background:#7B4FBF;"></div>
+        Sign up &amp; logistics
+      </div>
+
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3"/></svg></div>
+        <span class="check-text">James to sign up for all confirmed events</span>
+        <span class="check-owner owner-james">James / Rose</span>
+      </div>
+    </div>
+
+    <!-- Outreach & invites -->
+    <div class="checklist-group glass reveal">
+      <div class="checklist-group-title" style="color:#0F5C49;">
+        <div class="group-dot" style="background:#1A8C70;"></div>
+        Outreach &amp; invites
+      </div>
+
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3"/></svg></div>
+        <span class="check-text">Identify and reach out to Centigrade's connections — sovereigns, buyers, brokers — send personalised email + LinkedIn invite to each</span>
+        <span class="check-owner owner-rose">James / Rose</span>
+      </div>
+
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3"/></svg></div>
+        <span class="check-text">Pull attendee list from each event, map who to meet, flag priority names</span>
+        <span class="check-owner owner-rose">Rose</span>
+      </div>
+
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3"/></svg></div>
+        <span class="check-text">Book pre-scheduled 1:1s before arriving in London</span>
+        <span class="check-owner owner-rose">Rose</span>
+      </div>
+    </div>
+
+    <!-- MSCI prep -->
+    <div class="checklist-group glass reveal">
+      <div class="checklist-group-title" style="color:#1A3A5C;">
+        <div class="group-dot" style="background:#5B8DB8;"></div>
+        MSCI announcement prep
+      </div>
+
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3"/></svg></div>
+        <span class="check-text">Prep James talking points</span>
+        <span class="check-owner owner-hollis">Hollis</span>
+      </div>
+    </div>
+
+    <!-- LinkedIn -->
+    <div class="checklist-group glass reveal">
+      <div class="checklist-group-title" style="color:#0A66C2;">
+        <div class="group-dot" style="background:#0A66C2;"></div>
+        LinkedIn
+      </div>
+
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3"/></svg></div>
+        <span class="check-text">Pre-event post — "Article 6.2 and Article 4 will not happen — here's why and what we need to rethink" — publish 1–2 weeks before LCAW</span>
+        <span class="check-owner owner-hollis">Hollis</span>
+      </div>
+
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3"/></svg></div>
+        <span class="check-text">Post after MSCI panel — three sharp takeaways, tag co-panellists</span>
+        <span class="check-owner owner-hollis">Hollis</span>
+      </div>
+    </div>
+
+    <!-- Post-event (full width) -->
+    <div class="checklist-group glass reveal">
+      <div class="checklist-group-title" style="color:#7A4A0A;">
+        <div class="group-dot" style="background:#C07B20;"></div>
+        Post-event follow-up
+      </div>
+
+      <div>
+        <div class="checklist-item" onclick="toggleCheck(this)">
+          <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3"/></svg></div>
+          <span class="check-text">All leads logged in Attio within 5 working days</span>
+          <span class="check-owner owner-all">Rose, Oli</span>
+        </div>
+        <div class="checklist-item" onclick="toggleCheck(this)">
+          <div class="check-box"><svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3"/></svg></div>
+          <span class="check-text">Follow-up emails sent within 48hrs of each conversation</span>
+          <span class="check-owner owner-all">Rose, Oli</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+</section>
+
+
+<footer>
+  <div class="footer-brand">Centigrade & iCR</div>
+  <div class="footer-meta">LCAW 2026 Strategy<br>London · 20–28 June 2026 · Confidential</div>
+</footer>
+
+<script>
+function filterEvents(type, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.event-row').forEach(row => {
+    const tier = row.dataset.tier;
+    const msci = row.dataset.msci === 'true';
+    const ai   = row.dataset.ai === 'true';
+    if (type === 'all')   row.classList.remove('hidden');
+    else if (type === 'must')  row.classList.toggle('hidden', tier !== 'must');
+    else if (type === 'bonus') row.classList.toggle('hidden', tier !== 'bonus');
+    else if (type === 'msci')  row.classList.toggle('hidden', !msci);
+    else if (type === 'ai')    row.classList.toggle('hidden', !ai);
+  });
+  document.querySelectorAll('.day-divider').forEach(div => {
+    let next = div.nextElementSibling;
+    let hasVisible = false;
+    while (next && !next.classList.contains('day-divider')) {
+      if (next.classList.contains('event-row') && !next.classList.contains('hidden')) { hasVisible = true; break; }
+      next = next.nextElementSibling;
+    }
+    div.style.display = hasVisible ? '' : 'none';
+  });
+}
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 55);
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.07, rootMargin: '0px 0px -36px 0px' });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Checklist
+function toggleCheck(item) {
+  item.classList.toggle('done');
+  updateProgress();
+  saveState();
+}
+
+function markSignup(btn, e) {
+  e.preventDefault();
+  btn.classList.toggle('signed');
+  btn.querySelector('.signup-check').textContent = btn.classList.contains('signed') ? '✓' : '○';
+  btn.childNodes[1].textContent = btn.classList.contains('signed') ? ' Signed up' : ' Sign up';
+  saveState();
+}
+
+function updateProgress() {
+  const all  = document.querySelectorAll('.checklist-item');
+  const done = document.querySelectorAll('.checklist-item.done');
+  const pct  = all.length ? Math.round((done.length / all.length) * 100) : 0;
+  document.getElementById('progress-fill').style.width  = pct + '%';
+  document.getElementById('progress-label').textContent = done.length + ' / ' + all.length + ' complete';
+}
+
+function saveState() {
+  const states = [...document.querySelectorAll('.checklist-item')].map(el => el.classList.contains('done'));
+  const signups = [...document.querySelectorAll('.signup-toggle')].map(el => el.classList.contains('signed'));
+  localStorage.setItem('lcaw_checklist', JSON.stringify(states));
+  localStorage.setItem('lcaw_signups', JSON.stringify(signups));
+}
+
+function loadState() {
+  try {
+    const states  = JSON.parse(localStorage.getItem('lcaw_checklist') || '[]');
+    const signups = JSON.parse(localStorage.getItem('lcaw_signups')   || '[]');
+    const items   = document.querySelectorAll('.checklist-item');
+    const btns    = document.querySelectorAll('.signup-toggle');
+    states.forEach((done, i)   => { if (done    && items[i]) items[i].classList.add('done'); });
+    signups.forEach((signed, i) => {
+      if (signed && btns[i]) {
+        btns[i].classList.add('signed');
+        btns[i].querySelector('.signup-check').textContent = '✓';
+        btns[i].childNodes[1].textContent = ' Signed up';
+      }
+    });
+    updateProgress();
+  } catch(e) {}
+}
+
+loadState();
+</script>
+</body>
+</html>
